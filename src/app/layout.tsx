@@ -1,9 +1,23 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Travel Alarm",
   description: "Set alarms based on distance or time to your destination",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Travel Alarm",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#0a0a0a",
 };
 
 export default function RootLayout({
@@ -14,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-[#0a0a0a]">
-        <div className="max-w-md mx-auto px-4 py-6">{children}</div>
+        <div className="max-w-md mx-auto px-4 py-6 pb-20">{children}</div>
       </body>
     </html>
   );
