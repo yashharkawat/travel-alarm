@@ -3,8 +3,46 @@ import Analytics from "@/components/Analytics";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Travel Alarm",
-  description: "Set alarms based on distance or time to your destination",
+  metadataBase: new URL("https://travel-alarm.yashharkawat.com"),
+  title: "Travel Alarm - Distance & Time Based Travel Alerts",
+  description:
+    "Set smart travel alarms based on distance or time remaining to your destination. Get notified when you're approaching your stop so you never miss it again.",
+  keywords: [
+    "travel alarm",
+    "distance alarm",
+    "location alarm",
+    "travel alert",
+    "destination alarm",
+    "proximity alert",
+    "commute alarm",
+    "GPS alarm",
+    "travel notification",
+    "never miss your stop",
+  ],
+  authors: [{ name: "Yash Harkawat" }],
+  creator: "Yash Harkawat",
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: "https://travel-alarm.yashharkawat.com",
+  },
+  openGraph: {
+    title: "Travel Alarm - Distance & Time Based Travel Alerts",
+    description:
+      "Set smart travel alarms based on distance or time remaining to your destination. Never miss your stop again.",
+    type: "website",
+    url: "https://travel-alarm.yashharkawat.com",
+    siteName: "Travel Alarm",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Travel Alarm - Distance & Time Based Travel Alerts",
+    description:
+      "Set smart travel alarms based on distance or time remaining to your destination. Never miss your stop again.",
+    creator: "@yashharkawat",
+  },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
