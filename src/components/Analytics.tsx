@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { AnalyticsProvider } from "analytics-kit";
+import { AnalyticsProvider } from "@/lib/analytics";
 
 const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY || "";
 

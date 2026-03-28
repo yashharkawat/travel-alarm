@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useAppStore } from "@/lib/store";
 import { sendNotification } from "@/lib/notifications";
-import { trackEvent } from "analytics-kit";
+import { trackEvent } from "@/lib/analytics";
 import { Trip } from "@/lib/types";
 
 export function useAlarmChecker(trip: Trip | null) {

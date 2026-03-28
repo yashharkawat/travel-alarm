@@ -3,7 +3,7 @@ import { nanoid } from "nanoid";
 import { Trip, Alarm, LatLng, AlarmType, TravelMode, Place } from "./types";
 import { loadFromStorage, saveToStorage } from "./storage";
 import { haversineDistance, calculateETA } from "./geo";
-import { trackEvent } from "analytics-kit";
+import { trackEvent } from "@/lib/analytics";
 
 interface TrackingState {
   currentLocation: LatLng | null;

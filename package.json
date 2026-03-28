@@ -9,10 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "analytics-kit": "github:yashharkawat/analytics-kit",
     "leaflet": "^1.9",
     "nanoid": "^5",
     "next": "^15",
+    "posthog-js": "^1.364.1",
     "react": "^19",
     "react-dom": "^19",
     "react-leaflet": "^5",
