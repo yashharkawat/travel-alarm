@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Analytics from "@/components/Analytics";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -28,7 +29,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-[#0a0a0a]">
-        <div className="max-w-md mx-auto px-4 py-6 pb-20">{children}</div>
+        <Analytics>
+          <div className="max-w-md mx-auto px-4 py-6 pb-20">{children}</div>
+        </Analytics>
       </body>
     </html>
   );

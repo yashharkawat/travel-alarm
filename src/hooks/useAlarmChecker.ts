@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useAppStore } from "@/lib/store";
 import { sendNotification } from "@/lib/notifications";
+import { trackEvent } from "analytics-kit";
 import { Trip } from "@/lib/types";
 
 export function useAlarmChecker(trip: Trip | null) {
@@ -36,6 +37,11 @@ export function useAlarmChecker(trip: Trip | null) {
               : `${alarm.value} minutes remaining to ${trip.to.name}!`;
 
           sendNotification("Travel Alarm", msg);
+          trackEvent("alarm_triggered", {
+            type: alarm.type,
+            value: alarm.value,
+            destination: trip.to.name,
+          });
         }
       }
     }, 5000);

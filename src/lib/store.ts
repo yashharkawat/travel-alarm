@@ -3,6 +3,7 @@ import { nanoid } from "nanoid";
 import { Trip, Alarm, LatLng, AlarmType, TravelMode, Place } from "./types";
 import { loadFromStorage, saveToStorage } from "./storage";
 import { haversineDistance, calculateETA } from "./geo";
+import { trackEvent } from "analytics-kit";
 
 interface TrackingState {
   currentLocation: LatLng | null;
@@ -80,6 +81,11 @@ export const useAppStore = create<AppState>((set, get) => ({
     const trips = [...get().trips, trip];
     set({ trips });
     persistTrips(trips);
+    trackEvent("trip_created", {
+      destination: input.to.name,
+      mode: input.mode,
+      alarm_count: input.alarms.length,
+    });
     return id;
   },
 
@@ -104,9 +110,18 @@ export const useAppStore = create<AppState>((set, get) => ({
     });
     set({ trips });
     persistTrips(trips);
+    const trip = trips.find((t) => t.id === id);
+    if (trip) {
+      trackEvent("trip_started", {
+        destination: trip.to.name,
+        mode: trip.mode,
+        initial_distance_km: trip.initialDistance,
+      });
+    }
   },
 
   endTrip: (id) => {
+    const trip = get().trips.find((t) => t.id === id);
     const trips = get().trips.map((t) =>
       t.id === id
         ? { ...t, status: "completed" as const, completedAt: new Date().toISOString() }
@@ -114,6 +129,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     );
     set({ trips, tracking: { ...initialTracking } });
     persistTrips(trips);
+    if (trip) {
+      trackEvent("trip_ended", {
+        destination: trip.to.name,
+        mode: trip.mode,
+        alarms_triggered: trip.alarms.filter((a) => a.triggered).length,
+      });
+    }
   },
 
   addAlarm: (tripId, type, value) => {
