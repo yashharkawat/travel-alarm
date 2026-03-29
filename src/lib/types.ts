@@ -12,6 +12,11 @@ export type TravelMode = "bus" | "train" | "car";
 export type TripStatus = "planned" | "active" | "completed";
 export type AlarmType = "distance" | "time";
 
+export interface SpeedReading {
+  speed: number; // km/h
+  timestamp: number; // ms since epoch
+}
+
 export interface Alarm {
   id: string;
   type: AlarmType;

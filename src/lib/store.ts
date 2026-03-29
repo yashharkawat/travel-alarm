@@ -1,16 +1,17 @@
 import { create } from "zustand";
 import { nanoid } from "nanoid";
-import { Trip, Alarm, LatLng, AlarmType, TravelMode, Place } from "./types";
+import { Trip, Alarm, LatLng, AlarmType, TravelMode, Place, SpeedReading } from "./types";
 import { loadFromStorage, saveToStorage } from "./storage";
-import { haversineDistance, calculateETA } from "./geo";
+import { haversineDistance, calculateETA, getAverageSpeed } from "./geo";
 import { trackEvent } from "@/lib/analytics";
 
 interface TrackingState {
   currentLocation: LatLng | null;
   currentSpeed: number;
+  averageSpeed: number;
   distanceRemaining: number;
   etaMinutes: number | null;
-  speedHistory: number[];
+  speedHistory: SpeedReading[];
 }
 
 interface AppState {
@@ -40,6 +41,7 @@ interface AppState {
 const initialTracking: TrackingState = {
   currentLocation: null,
   currentSpeed: 0,
+  averageSpeed: 0,
   distanceRemaining: 0,
   etaMinutes: null,
   speedHistory: [],
@@ -181,13 +183,21 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   updateTracking: (location, speed, destinationCoords) => {
     const prev = get().tracking;
-    const newHistory = [...prev.speedHistory, speed].slice(-10);
+    const now = Date.now();
+    const SPEED_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+    // Keep readings from last 15 minutes
+    const newHistory = [
+      ...prev.speedHistory.filter((r) => now - r.timestamp <= SPEED_WINDOW_MS),
+      { speed, timestamp: now },
+    ];
     const distance = haversineDistance(location, destinationCoords);
     const eta = calculateETA(distance, newHistory);
+    const avgSpeed = getAverageSpeed(newHistory);
     set({
       tracking: {
         currentLocation: location,
         currentSpeed: speed,
+        averageSpeed: avgSpeed,
         distanceRemaining: distance,
         etaMinutes: eta,
         speedHistory: newHistory,

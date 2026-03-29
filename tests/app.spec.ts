@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Travel Alarm App", () => {
   test("1. Home page loads with empty state", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("text=Travel Alarm")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Travel Alarm" })).toBeVisible();
     await expect(page.locator("text=No trips yet")).toBeVisible();
     await expect(page.locator("text=+ New Trip")).toBeVisible();
     await page.screenshot({ path: "tests/screenshots/01-home-empty.png" });
@@ -71,7 +71,7 @@ test.describe("Travel Alarm App", () => {
 
     // Add the alarm
     await page.locator("button:has-text('Add Alarm')").last().click();
-    await expect(page.locator("text=5 km remaining")).toBeVisible();
+    await expect(page.locator("text=5 km before destination")).toBeVisible();
     await page.screenshot({ path: "tests/screenshots/05c-alarm-added.png" });
   });
 
@@ -194,7 +194,50 @@ test.describe("Travel Alarm App", () => {
     });
   });
 
-  test("10. Delete a completed trip", async ({ page, context }) => {
+  test("10. Tracking page shows avg speed and correct labels", async ({ page, context }) => {
+    await context.grantPermissions(["geolocation", "notifications"]);
+    await context.setGeolocation({ latitude: 12.9716, longitude: 77.5946 }); // Bangalore
+
+    await page.goto("/trip/new");
+
+    const destInput = page.locator('input[placeholder="Where are you going?"]');
+    await destInput.fill("Goa");
+    await page.waitForTimeout(2000);
+    const dropdown = page.locator(".absolute.z-50");
+    if (await dropdown.isVisible().catch(() => false)) {
+      await dropdown.locator("button").first().click();
+      await page.waitForTimeout(500);
+    }
+
+    // Add distance alarm
+    await page.click("text=+ Add Alarm");
+    await page.click("button:has-text('📏 Distance')");
+    await page.click("button:has-text('5 km')");
+    await page.locator("button:has-text('Add Alarm')").last().click();
+
+    // Start trip
+    await page.click("button:has-text('Start Trip')");
+    await page.waitForTimeout(3000);
+
+    // Check "To destination" label exists instead of "Distance left"
+    await expect(page.locator("text=To destination")).toBeVisible();
+    // Check "Avg (15m)" label for average speed
+    await expect(page.locator("text=Avg (15m)")).toBeVisible();
+    // Check speed label
+    await expect(page.locator("text=Speed")).toBeVisible();
+    // Check alarm shows "before destination"
+    await expect(page.locator("text=5 km before destination")).toBeVisible();
+
+    await page.screenshot({
+      path: "tests/screenshots/10-tracking-labels.png",
+    });
+
+    // End trip
+    await page.click("button:has-text('End Trip')");
+    await page.waitForURL("/");
+  });
+
+  test("11. Delete a completed trip", async ({ page, context }) => {
     await context.grantPermissions(["geolocation"]);
     await context.setGeolocation({ latitude: 12.9716, longitude: 77.5946 });
 

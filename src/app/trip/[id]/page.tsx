@@ -8,6 +8,13 @@ import { getCurrentPosition } from "@/lib/location";
 import {
   requestNotificationPermission,
   stopAlarmSound,
+  registerServiceWorker,
+  unlockAudio,
+  requestWakeLock,
+  releaseWakeLock,
+  showTrackingNotification,
+  updateTrackingNotification,
+  clearTrackingNotification,
 } from "@/lib/notifications";
 import { useLocationTracking } from "@/hooks/useLocationTracking";
 import { useAlarmChecker } from "@/hooks/useAlarmChecker";
@@ -38,6 +45,11 @@ export default function TripTrackingPage({
     if (!hydrated) hydrate();
   }, [hydrated, hydrate]);
 
+  // Register service worker on mount
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
+
   // Start trip if planned
   useEffect(() => {
     if (!trip || trip.status !== "planned" || starting) return;
@@ -46,8 +58,16 @@ export default function TripTrackingPage({
     (async () => {
       try {
         await requestNotificationPermission();
+        unlockAudio(); // Pre-unlock audio context
         const loc = await getCurrentPosition();
         startTrip(trip.id, loc);
+        // Request wake lock to keep device awake
+        await requestWakeLock();
+        // Show persistent tracking notification
+        showTrackingNotification(
+          `Tracking trip to ${trip.to.name}`,
+          trip.id
+        );
       } catch {
         setError(
           "Could not get your location. Please enable location access and reload."
@@ -55,6 +75,26 @@ export default function TripTrackingPage({
       }
     })();
   }, [trip, starting, startTrip]);
+
+  // Update persistent notification with live stats
+  useEffect(() => {
+    if (!trip || trip.status !== "active" || !tracking.currentLocation) return;
+    const dist = tracking.distanceRemaining;
+    const distStr =
+      dist < 1
+        ? `${Math.round(dist * 1000)}m`
+        : `${dist.toFixed(1)}km`;
+    const etaStr =
+      tracking.etaMinutes !== null
+        ? tracking.etaMinutes < 1
+          ? "Arriving!"
+          : `${Math.round(tracking.etaMinutes)}min`
+        : "...";
+    updateTrackingNotification(
+      `${distStr} to ${trip.to.name} | ETA: ${etaStr} | Avg: ${Math.round(tracking.averageSpeed)} km/h`,
+      trip.id
+    );
+  }, [trip, tracking]);
 
   // Track location
   const destinationCoords =
@@ -67,6 +107,8 @@ export default function TripTrackingPage({
   function handleEndTrip() {
     if (!trip) return;
     stopAlarmSound();
+    clearTrackingNotification();
+    releaseWakeLock();
     endTrip(trip.id);
     router.push("/");
   }
@@ -153,6 +195,7 @@ export default function TripTrackingPage({
           distanceRemaining={tracking.distanceRemaining}
           etaMinutes={tracking.etaMinutes}
           currentSpeed={tracking.currentSpeed}
+          averageSpeed={tracking.averageSpeed}
           initialDistance={trip.initialDistance}
         />
       </div>
@@ -191,10 +234,13 @@ export default function TripTrackingPage({
       {/* Stop alarm sound button - show when any alarm triggered */}
       {trip.alarms.some((a) => a.triggered) && (
         <button
-          onClick={stopAlarmSound}
+          onClick={() => {
+            stopAlarmSound();
+            unlockAudio(); // Re-unlock for next alarm
+          }}
           className="w-full py-2.5 mb-3 bg-yellow-600 text-white rounded-xl text-sm hover:bg-yellow-700 transition-colors"
         >
-          🔇 Stop Alarm Sound
+          Stop Alarm Sound
         </button>
       )}
 

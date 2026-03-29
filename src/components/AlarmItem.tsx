@@ -12,7 +12,7 @@ export default function AlarmItem({ alarm, onRemove }: Props) {
   const unit = alarm.type === "distance" ? "km" : "min";
   const label =
     alarm.type === "distance"
-      ? `${alarm.value} km remaining`
+      ? `${alarm.value} km before destination`
       : `${alarm.value} min before arrival`;
 
   return (

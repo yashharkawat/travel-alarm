@@ -4,6 +4,7 @@ interface Props {
   distanceRemaining: number;
   etaMinutes: number | null;
   currentSpeed: number;
+  averageSpeed: number;
   initialDistance: number | null;
 }
 
@@ -11,6 +12,7 @@ export default function TripProgress({
   distanceRemaining,
   etaMinutes,
   currentSpeed,
+  averageSpeed,
   initialDistance,
 }: Props) {
   const progress =
@@ -43,26 +45,32 @@ export default function TripProgress({
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-4 gap-2">
         <div className="text-center">
-          <div className="text-xl font-bold text-white">
+          <div className="text-lg font-bold text-white">
             {distanceRemaining < 1
               ? `${Math.round(distanceRemaining * 1000)}m`
               : `${distanceRemaining.toFixed(1)}km`}
           </div>
-          <div className="text-xs text-gray-400">Distance left</div>
+          <div className="text-xs text-gray-400">To destination</div>
         </div>
         <div className="text-center">
-          <div className="text-xl font-bold text-white">
+          <div className="text-lg font-bold text-white">
             {formatEta(etaMinutes)}
           </div>
           <div className="text-xs text-gray-400">ETA</div>
         </div>
         <div className="text-center">
-          <div className="text-xl font-bold text-white">
+          <div className="text-lg font-bold text-white">
             {Math.round(currentSpeed)} km/h
           </div>
           <div className="text-xs text-gray-400">Speed</div>
+        </div>
+        <div className="text-center">
+          <div className="text-lg font-bold text-white">
+            {Math.round(averageSpeed)} km/h
+          </div>
+          <div className="text-xs text-gray-400">Avg (15m)</div>
         </div>
       </div>
     </div>

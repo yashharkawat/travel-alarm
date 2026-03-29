@@ -33,10 +33,10 @@ export function useAlarmChecker(trip: Trip | null) {
 
           const msg =
             alarm.type === "distance"
-              ? `${alarm.value} km remaining to ${trip.to.name}!`
-              : `${alarm.value} minutes remaining to ${trip.to.name}!`;
+              ? `${alarm.value} km before ${trip.to.name}!`
+              : `${alarm.value} minutes before ${trip.to.name}!`;
 
-          sendNotification("Travel Alarm", msg);
+          sendNotification("Travel Alarm", msg, trip.id);
           trackEvent("alarm_triggered", {
             type: alarm.type,
             value: alarm.value,
